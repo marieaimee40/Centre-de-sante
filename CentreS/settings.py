@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'reversion',
     'import_export',
-    'CentreSante.apps.CentresanteConfig',
+    #'CentreSante.apps.CentresanteConfig',
 ]
 
 MIDDLEWARE = [
