@@ -42,7 +42,7 @@ class Activite(models.Model):
 
 
 
-class PeriodesReporting(models.Model): #a revoir(foreignkey)
+class PeriodesReporting(models.Model): 
     id_periodesreporting=models.AutoField(primary_key=True)
     id_activite=models.ForeignKey(Activite, on_delete=models.PROTECT)
     id_periodicite=models.ForeignKey(Periodicite, on_delete=models.PROTECT)
@@ -51,6 +51,15 @@ class PeriodesReporting(models.Model): #a revoir(foreignkey)
 
 class DimDate(models.Model):
     id_date=models.AutoField(primary_key=True)
+    date=models.DateField()
+    jour=models.PositiveIntegerField()
+    semaine=models.PositiveIntegerField()
+    mois=models.PositiveIntegerField()
+    trimestre=models.PositiveIntegerField()
+    Semestre=models.PositiveIntegerField()
+    Annee=models.PositiveIntegerField()
+    creation_time=models.DateTimeField(auto_now_add=True)
+    update_time=models.DateTimeField(blank=True, null=True)
 
 class Fact_Prestation(models.Model):
     id_fact_prestation=models.AutoField(primary_key=True)
