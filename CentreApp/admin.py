@@ -26,9 +26,15 @@ class FactPrestationAdmin(VersionAdmin):
 	pass
 
 
+class DimDateResource(resources.ModelResource):
+	class Meta:
+		model = DimDate
+		import_id_fields = ('date',)
+		exclude = ('creation_time', 'update_time', )
 
-class DimDateAdmin(admin.ModelAdmin):
-	list_display = ('date', 'jour', 'mois', 'semestre', 'annee',)
+class DimDateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+	resource_class = DimDateResource
+	list_display = ('date', 'jour', 'mois', 'nom_jour', 'nom_mois', 'semestre', 'annee',)
 
 
 

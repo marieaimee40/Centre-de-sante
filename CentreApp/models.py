@@ -2,9 +2,6 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
-import datetime
-
-
 # Create your models here.
 
 class MonitoredTimeModel(models.Model):
@@ -77,6 +74,14 @@ class DimDate(MonitoredTimeModel):
 		return str(self.date.strftime("%V"))
 
 	@property
+	def nom_jour(self):
+		return str(self.date.strftime("%A"))
+
+	@property
+	def nom_mois(self):
+		return str(self.date.strftime("%B"))
+
+	@property
 	def trimestre(self):
 		return str(int(self.date.month/3)+1)
 
@@ -87,6 +92,7 @@ class DimDate(MonitoredTimeModel):
 	@property
 	def annee(self):
 		return str(self.date.year)
+
 
 class FactPrestation(MonitoredTimeModel):
 	activite = models.ForeignKey("Activite", on_delete = models.PROTECT, related_name="prestations")
