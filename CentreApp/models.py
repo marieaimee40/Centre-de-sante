@@ -2,69 +2,112 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
+import datetime
+
+
 # Create your models here.
 
-class CategorieAgent(models.Model):
-    id_categorie_agent=models.AutoField(primary_key=True)
-    label=models.CharField(max_length=50)
-    creation_time=models.DateTimeField(auto_now_add=True)
-    update_time=models.DateTimeField(blank=True, null=True)
+class MonitoredTimeModel(models.Model):
+	creation_time = models.DateTimeField(auto_now_add=True)
+	update_time = models.DateTimeField(auto_now=True)
 
-class TypeActivite(models.Model):
-    id_type_activite=models.AutoField(primary_key=True)
-    label=models.CharField(max_length=50)
-    creation_time=models.DateTimeField(auto_now_add=True)
-    update_time=models.DateTimeField(blank=True, null=True)
+	class Meta:
+		abstract = True
 
-class Agent(models.Model):
-    id_agent=models.AutoField(primary_key=True)
-    code_agent=models.CharField(max_length=10)
-    nom=models.CharField(max_length=50)
-    prenoms=models.CharField(max_length=50)
-    id_categorie_agent=models.ForeignKey(TypeActivite, on_delete=models.PROTECT)
-    creation_time=models.DateTimeField(auto_now_add=True)
-    update_time=models.DateTimeField(blank=True, null=True)
+class CategorieAgent(MonitoredTimeModel):
+	label = models.CharField(max_length=50, blank=False)
 
-class Periodicite(models.Model):
-    id_periodicite=models.AutoField(primary_key=True)
-    label=models.CharField(max_length=50)
-    dim_date_column_name=models.CharField(max_length=20)
-    creation_time=models.DateTimeField(auto_now_add=True)
-    update_time=models.DateTimeField(blank=True, null=True)
+	def __str__(self):
+		return self.label
 
-class Activite(models.Model):
-    id_Activte=models.AutoField(primary_key=True)
-    label=models.CharField(max_length=50)
-    id_type_activite=models.ForeignKey(TypeActivite, on_delete=models.PROTECT)
-    id_categorie_agent=models.ForeignKey(CategorieAgent, null=True, on_delete=models.SET_NULL)
-    creation_time=models.DateTimeField(auto_now_add=True)
-    update_time=models.DateTimeField(blank=True, null=True)
+	class Meta:
+		verbose_name = "Categorie d'agents"
+		verbose_name_plural = "Categories d'agents"
 
+class TypeActivite(MonitoredTimeModel):
+	label = models.CharField(max_length=50, blank=False)
 
+	def __str__(self):
+		return self.label
 
-class PeriodesReporting(models.Model): 
-    id_periodesreporting=models.AutoField(primary_key=True)
-    id_activite=models.ForeignKey(Activite, on_delete=models.PROTECT)
-    id_periodicite=models.ForeignKey(Periodicite, on_delete=models.PROTECT)
-    creation_time=models.DateTimeField(auto_now_add=True)
-    update_time=models.DateTimeField(blank=True, null=True)
+	class Meta:
+		verbose_name = "Type d'activites"
+		verbose_name_plural = "Types d'activites"
 
-class DimDate(models.Model):
-    id_date=models.AutoField(primary_key=True)
-    date=models.DateField()
-    jour=models.PositiveIntegerField()
-    semaine=models.PositiveIntegerField()
-    mois=models.PositiveIntegerField()
-    trimestre=models.PositiveIntegerField()
-    Semestre=models.PositiveIntegerField()
-    Annee=models.PositiveIntegerField()
-    creation_time=models.DateTimeField(auto_now_add=True)
-    update_time=models.DateTimeField(blank=True, null=True)
+class Agent(MonitoredTimeModel):
+	code = models.CharField(max_length=10, blank=False)
+	nom = models.CharField(max_length=50, blank=False)
+	prenoms = models.CharField(max_length=50, blank=True, null=True)
+	categorie_agent = models.ForeignKey("CategorieAgent", on_delete = models.PROTECT, related_name="agents")
 
-class Fact_Prestation(models.Model):
-    id_fact_prestation=models.AutoField(primary_key=True)
-    id_activite=models.ForeignKey(Activite, on_delete=models.PROTECT)
-    id_date=models.ForeignKey(DimDate, on_delete=models.PROTECT)
-    quantite=models.IntegerField()
-    creation_time=models.DateTimeField(auto_now_add=True)
-    update_time=models.DateTimeField(blank=True, null=True)
+	def __str__(self):
+		return "{} {}".format(self.prenoms, self.nom)
+
+class Activite(MonitoredTimeModel):
+	label = models.CharField(max_length=50, blank=False)
+	type_activite = models.ForeignKey("TypeActivite", on_delete = models.PROTECT, related_name="activites")
+	categorie_agent = models.ForeignKey("CategorieAgent", null=True, on_delete = models.SET_NULL, related_name="activites")
+
+	def __str__(self):
+		return self.label
+
+class DimDate(MonitoredTimeModel):
+	date = models.DateField(primary_key=True, unique=True, blank=False)
+	#jour = models.PositiveIntegerField(blank=False)
+	#semaine = models.PositiveIntegerField(blank=False)
+	#mois = models.PositiveIntegerField(blank=False)
+	#trimestre = models.PositiveIntegerField(blank=False)
+	#semestre = models.PositiveIntegerField(blank=False)
+	#annee = models.PositiveIntegerField(blank=False)
+
+	class Meta:
+		verbose_name = "Dimension DATE"
+		verbose_name_plural = "Dimensions DATE"
+
+	@property
+	def jour(self):
+		return str(self.date.day)
+
+	@property
+	def mois(self):
+		return str(self.date.month)
+
+	@property
+	def semaine(self):
+		return str(self.date.strftime("%V"))
+
+	@property
+	def trimestre(self):
+		return str(int(self.date.month/3)+1)
+
+	@property
+	def semestre(self):
+		return str(int(self.date.month/6)+1)
+
+	@property
+	def annee(self):
+		return str(self.date.year)
+
+class FactPrestation(MonitoredTimeModel):
+	activite = models.ForeignKey("Activite", on_delete = models.PROTECT, related_name="prestations")
+	date = models.ForeignKey("DimDate", on_delete = models.PROTECT, related_name="prestations")
+	quantite = models.IntegerField(blank=False)
+
+	class Meta:
+		verbose_name = "Prestation"
+		verbose_name_plural = "Prestations"
+
+class Periodicite(MonitoredTimeModel):
+	label = models.CharField(max_length=50, blank=False)
+	dim_date_column_name = models.CharField(max_length=20, blank=False)
+
+	def __str__(self):
+		return self.label
+
+class PeriodeReporting(MonitoredTimeModel):
+	activite = models.ForeignKey("Activite", on_delete = models.PROTECT, related_name="periodes_reporting")
+	periodicite = models.ForeignKey("Periodicite", on_delete = models.PROTECT, related_name="periodes_reporting")
+
+	class Meta:
+		verbose_name = "Periode de reporting"
+		verbose_name_plural = "Periodes de reporting"

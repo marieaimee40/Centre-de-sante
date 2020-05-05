@@ -1,2 +1,6 @@
 coding
 db.sqlite3
+*.pyc
+*.pot
+*.log
+__pycache__/
