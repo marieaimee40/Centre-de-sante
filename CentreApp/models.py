@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+import datetime
 
 # Create your models here.
 
@@ -39,6 +40,22 @@ class Agent(MonitoredTimeModel):
 
 	def __str__(self):
 		return "{} {}".format(self.prenoms, self.nom)
+
+class Patient(MonitoredTimeModel):
+	code = models.CharField(max_length=10, blank=False)
+	nom = models.CharField(max_length=50, blank=False)
+	prenoms = models.CharField(max_length=50, blank=True, null=True)
+	date_enrolement = models.DateField(blank=False)
+
+	def __str__(self):
+		return "{} {}".format(self.prenoms, self.nom)
+
+	@property
+	def cohorte_actuelle(self):
+		today = datetime.datetime.now()
+		diff_mois = (today.year - self.date_enrolement.year) *12 + today.month - self.date_enrolement.month + 1
+		return "M-{}".format(str(diff_mois))
+
 
 class Activite(MonitoredTimeModel):
 	label = models.CharField(max_length=50, blank=False)
