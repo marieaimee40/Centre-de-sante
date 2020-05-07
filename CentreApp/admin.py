@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import CategorieAgent, TypeActivite, Agent, Activite, DimDate, FactPrestation, Periodicite, PeriodeReporting
+from .models import (
+	CategorieAgent, TypeActivite, Agent, Activite, DimDate,
+	FactPrestation, Periodicite, PeriodeReporting, Patient
+	)
 
 from reversion.admin import VersionAdmin
 
@@ -20,6 +23,20 @@ class AgentResource(resources.ModelResource):
 @admin.register(Agent)
 class AgentAdmin(ImportExportModelAdmin, VersionAdmin):
     	resource_class = AgentResource
+
+
+class PatientResource(resources.ModelResource):
+	class Meta:
+		model = Patient
+		import_id_fields = ('code',)
+		exclude = ('id', 'creation_time', 'update_time', )
+
+
+@admin.register(Patient)
+class PatientAdmin(ImportExportModelAdmin, VersionAdmin):
+	resource_class = PatientResource
+	list_display = ('code', 'nom', 'prenoms', 'date_enrolement', 'cohorte_actuelle',)
+
 
 @admin.register(FactPrestation)
 class FactPrestationAdmin(VersionAdmin):
