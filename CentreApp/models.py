@@ -1,7 +1,8 @@
+import datetime
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-import datetime
+from django.core.validators import MaxValueValidator
 
 # Create your models here.
 
@@ -22,6 +23,16 @@ class CategorieAgent(MonitoredTimeModel):
 		verbose_name = "Categorie d'agents"
 		verbose_name_plural = "Categories d'agents"
 
+class TypeContact(MonitoredTimeModel):
+	label = models.CharField(max_length=50, blank=False)
+
+	def __str__(self):
+		return self.label
+
+	class Meta:
+		verbose_name = "Type de contact"
+		verbose_name_plural = "Types de contact"
+
 class TypeActivite(MonitoredTimeModel):
 	label = models.CharField(max_length=50, blank=False)
 
@@ -31,6 +42,12 @@ class TypeActivite(MonitoredTimeModel):
 	class Meta:
 		verbose_name = "Type d'activites"
 		verbose_name_plural = "Types d'activites"
+
+class FeedbackRelance(models.Model):
+	label = models.CharField("Retour de relance", max_length=20, blank=False)
+
+	def __str__(self):
+		return self.label
 
 class Agent(MonitoredTimeModel):
 	code = models.CharField(max_length=10, blank=False)
@@ -45,17 +62,69 @@ class Patient(MonitoredTimeModel):
 	code = models.CharField(max_length=10, blank=False)
 	nom = models.CharField(max_length=50, blank=False)
 	prenoms = models.CharField(max_length=50, blank=True, null=True)
-	date_enrolement = models.DateField(blank=False)
+	date_enrolement = models.DateField(blank=False, validators = [MaxValueValidator(datetime.datetime.now().date())])
+	
 
 	def __str__(self):
-		return "{} {}".format(self.prenoms, self.nom)
+		return self.code
 
 	@property
 	def cohorte_actuelle(self):
 		today = datetime.datetime.now()
 		diff_mois = (today.year - self.date_enrolement.year) *12 + today.month - self.date_enrolement.month + 1
-		return "M-{}".format(str(diff_mois))
+		return "M{}".format(str(diff_mois))
 
+	@property
+	def derniere_visite(self):
+		return self.visites_patients.latest('creation_time')
+
+	@property
+	def derniere_relance(self):
+		return self.relances_patients.latest('creation_time')
+
+	@property
+	def liste_contacts_actifs(self):
+		return ", ".join(["{} : {}".format(contact["type_contact__label"], contact["contact"]) for contact in list(self.contacts_patients.filter(active=True).values('type_contact__label','contact'))])
+
+class VisitePatient(MonitoredTimeModel):
+	patient = models.ForeignKey("Patient", on_delete=models.CASCADE, blank=True, null=True, related_name="visites_patients")
+	activite = models.ForeignKey("Activite", on_delete=models.CASCADE, blank=True, null=True, help_text="Activité réalisée", related_name="visites_patients")
+	date = models.DateField("Date de la visite")
+
+	def __str__(self):
+		return "{}: {}".format(self.date, self.activite)
+
+class RelancePatient(MonitoredTimeModel):
+	patient = models.ForeignKey("Patient", on_delete=models.CASCADE, blank=True, null=True, related_name="relances_patients")
+	date = models.DateField("Date de la visite")
+	feedback = models.ForeignKey("FeedbackRelance", on_delete=models.SET_NULL, blank=True, null=True)
+
+	def __str__(self):
+		return "{}: {}".format(self.date, self.feedback)
+	
+class ContactPatient(MonitoredTimeModel):
+	patient = models.ForeignKey("Patient", on_delete=models.CASCADE, blank=True, null=True, related_name="contacts_patients")
+	type_contact = models.ForeignKey("TypeContact", on_delete=models.SET_NULL, blank=True, null=True)
+	contact = models.CharField("Contact", max_length=50, blank=False, null=False)
+
+	active = models.BooleanField("Contact actif", default=True)
+
+	def __str__(self):
+		return self.contact
+	
+	@property
+	def description(self):
+		return 
+
+
+class PersonneSoutien(MonitoredTimeModel):
+	patient = models.ForeignKey("Patient", on_delete=models.CASCADE, blank=True, null=True)
+	nom = models.CharField(max_length=50, blank=False)
+	prenoms = models.CharField(max_length=50, blank=True, null=True)
+	contact = models.CharField("Contact", max_length=50, blank=False, null=False)
+
+	def __str__(self):
+		return "{} {}".format(self.prenoms, self.nom.upper())
 
 class Activite(MonitoredTimeModel):
 	label = models.CharField(max_length=50, blank=False)
@@ -67,12 +136,6 @@ class Activite(MonitoredTimeModel):
 
 class DimDate(MonitoredTimeModel):
 	date = models.DateField(primary_key=True, unique=True, blank=False)
-	#jour = models.PositiveIntegerField(blank=False)
-	#semaine = models.PositiveIntegerField(blank=False)
-	#mois = models.PositiveIntegerField(blank=False)
-	#trimestre = models.PositiveIntegerField(blank=False)
-	#semestre = models.PositiveIntegerField(blank=False)
-	#annee = models.PositiveIntegerField(blank=False)
 
 	class Meta:
 		verbose_name = "Dimension DATE"
