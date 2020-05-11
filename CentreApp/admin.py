@@ -36,7 +36,7 @@ class AgentResource(resources.ModelResource):
 
 @admin.register(Agent)
 class AgentAdmin(ImportExportModelAdmin, VersionAdmin):
-	resource_class = AgentResource
+    	resource_class = AgentResource
 
 
 class PatientResource(resources.ModelResource):
