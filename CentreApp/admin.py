@@ -5,16 +5,12 @@ from reversion.admin import VersionAdmin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-<<<<<<< HEAD
-=======
 
 admin.site.site_header = "Compteur d'activites"
 admin.site.site_title = "Compteur d'activites"
 #admin.site.index_title = "Index title"
->>>>>>> 749fc7a0189094bc9ffe65aba0b8e728fe9443cc
+
 # Register your models here.
-
-
 
 class VisitePatientInline(admin.TabularInline):
     model = VisitePatient
