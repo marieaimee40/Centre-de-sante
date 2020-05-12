@@ -4,3 +4,5 @@ db.sqlite3
 *.pot
 *.log
 __pycache__/
+migrations
+.vscode
