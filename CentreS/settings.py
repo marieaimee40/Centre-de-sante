@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'reversion',
     'import_export',
+    'rest_framework_swagger',
     'CentreApp',
     'rest_framework',
 ]
