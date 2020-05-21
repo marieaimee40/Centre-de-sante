@@ -7,16 +7,12 @@ from .serializers import *
 
 # ViewSets define the view behavior.
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    a user
-    """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 class AgentViewSet(viewsets.ModelViewSet):
-    """
-    C'est un agent
-    """
+
     queryset =Agent.objects.all()
     serializer_class = AgentSerializer
 
