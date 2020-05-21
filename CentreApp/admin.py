@@ -2,8 +2,9 @@ from django.contrib import admin
 from .models import *
 
 from reversion.admin import VersionAdmin
-from import_export import resources
+from import_export import resources,fields
 from import_export.admin import ImportExportModelAdmin
+from import_export.widgets import ForeignKeyWidget
 
 
 admin.site.site_header = "Compteur d'activites"
@@ -28,6 +29,10 @@ class PersonneSoutienInline(admin.TabularInline):
 
 
 class AgentResource(resources.ModelResource):
+	categorie_agent = fields.Field(
+		column_name='categorie_agent',
+		attribute='categorie_agent',
+		widget=ForeignKeyWidget(CategorieAgent,'label'))
 	class Meta:
 		model = Agent
 		import_id_fields = ('code',)
