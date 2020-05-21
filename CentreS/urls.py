@@ -15,10 +15,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf import settings
-from django.urls import path
+from django.urls import path,re_path
+from rest_framework import permissions
 from django.conf.urls import url, include
-from rest_framework_swagger.views import get_swagger_view
-schema_view = get_swagger_view(title='Swagger API')
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+#from rest_framework.documentation import include_docs_urls
+schema_view = get_schema_view(
+        openapi.Info(
+        title="CentreApp API",
+        default_version='v1'
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 from rest_framework import routers
 from CentreApp.views import *
@@ -34,32 +44,38 @@ from CentreApp.views import *
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'Agent', AgentViewSet)
-router.register(r'CategorieAgent', CategorieAgentViewSet)
-router.register(r'TypeContact', TypeContactViewSet)
-router.register(r'TypeActivite', TypeActiviteViewSet)
-router.register(r'FeedbackRelance', FeedbackRelanceViewSet)
+router.register(r'Categorie Agent', CategorieAgentViewSet)
+router.register(r'Type Contact', TypeContactViewSet)
+router.register(r'Type Activite', TypeActiviteViewSet)
+router.register(r'Feedback Relance', FeedbackRelanceViewSet)
 router.register(r'Patient', PatientViewSet)
-router.register(r'VisitePatient', VisitePatientViewSet)
-router.register(r'RelancePatient', RelancePatientViewSet)
-router.register(r'ContactPatient', ContactPatientViewSet)
-router.register(r'PersonneSoutien', PersonneSoutienViewSet)
+router.register(r'Visite Patient', VisitePatientViewSet)
+router.register(r'Relance Patient', RelancePatientViewSet)
+router.register(r'Contact Patient', ContactPatientViewSet)
+router.register(r'Personne Soutien', PersonneSoutienViewSet)
 router.register(r'Activite',  ActiviteViewSet)
 router.register(r'DimDate',  DimDateViewSet)
-router.register(r'FactPrestation',  FactPrestationViewSet)
+router.register(r'Fact Prestation',  FactPrestationViewSet)
 router.register(r'Periodicite',  PeriodiciteViewSet)
-router.register(r'PeriodeReporting',  PeriodeReportingViewSet)
+router.register(r'Periode Reporting',  PeriodeReportingViewSet)
 urlpatterns = router.urls
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    url(r'^', include(router.urls)),
-    url(r'^api-auth/', include('rest_framework.urls')),
-    #url(r'^docs/', schema_view),
-    #url(r'^api-auth/', include('rest_framewosrk_swagger.urls')),
+    path('admin/', admin.site.urls),
+    #url(r'^api/', include('rest_framework.urls')),
+    url('api/', include(router.urls)),
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
+     #re_path(r'^doc(?P<format>\.json|\.yaml)$',
+           # schema_view.without_ui(cache_timeout=0), name='schema-json'),  #<-- Here
+    path('api/doc/', schema_view.with_ui('swagger', cache_timeout=0),
+         name='schema-swagger-ui'),  #<-- Here
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0),
+         name='schema-redoc'), 
 ]
-
-if settings.DEBUG:
-    from django.conf.urls.static import static
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+#urlpatterns += router.urls
+#if settings.DEBUG:
+ #   from django.conf.urls.static import static
+ #   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+ #   urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
