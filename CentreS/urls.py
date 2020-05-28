@@ -18,12 +18,11 @@ from django.conf import settings
 from django.urls import path,re_path
 from rest_framework import permissions
 from django.conf.urls import url, include
-<<<<<<< HEAD
 
 #Utilisation de Framework Django REST dans urls.py
 from rest_framework_swagger.views import get_swagger_view
 schema_view = get_swagger_view(title='Swagger API')
-=======
+
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 #from rest_framework.documentation import include_docs_urls
@@ -35,7 +34,6 @@ schema_view = get_schema_view(
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
->>>>>>> d663a39871ce9bd887bf1ba0ffa6cc1b84e7ed02
 
 from rest_framework import routers
 from CentreApp.views import *
