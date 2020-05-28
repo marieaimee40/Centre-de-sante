@@ -14,7 +14,16 @@ class MonitoredTimeModel(models.Model):
 		abstract = True
 
 class CategorieAgent(MonitoredTimeModel):
-	label = models.CharField(max_length=50, blank=False)
+	"""
+	Le champ pour la categorie agent
+	:param label: Un nom
+	:type label: str
+	:return: le nom de la categorie
+	:rtype: str
+
+	"""
+	label = models.CharField(max_length=50, blank=False,help_text="Le nom de la categorie")
+	
 
 	def __str__(self):
 		return self.label
@@ -44,12 +53,21 @@ class TypeActivite(MonitoredTimeModel):
 		verbose_name_plural = "Types d'activites"
 
 class FeedbackRelance(models.Model):
+	"""
+	La reponse d'un patient suite en un appel ou le resultat de la relance 
+	Exemple: Refus de venir ou Injoingable
+
+	"""
 	label = models.CharField("Retour de relance", max_length=20, blank=False)
 
 	def __str__(self):
 		return self.label
 
 class Agent(MonitoredTimeModel):
+	"""
+	Enregistrement d'un agent qui exite sur le site ( code : code agent, nom, prenoms,et sa categorie agent)
+	:model:'categorie_agent.CategorieAgent'
+	"""
 	code = models.CharField(max_length=10, blank=False)
 	nom = models.CharField(max_length=50, blank=False)
 	prenoms = models.CharField(max_length=50, blank=True, null=True)
